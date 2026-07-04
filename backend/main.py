@@ -107,19 +107,53 @@ class RoomManager:
 
             # Verificar condição de resolução (tempo zerou OU ambos submeteram)
             if game.timer_seconds <= 0 or (game.white_ready and game.black_ready):
+                white_lost_spacetime = False
+                black_lost_spacetime = False
+                
                 if game.timer_seconds <= 0:
                     if not game.white_ready:
                         revert_uci = game.get_revert_move(chess.WHITE)
                         if revert_uci:
                             game.white_move_uci = revert_uci
                             game.white_is_retreating = True
+                        else:
+                            white_lost_spacetime = True
                     if not game.black_ready:
                         revert_uci = game.get_revert_move(chess.BLACK)
                         if revert_uci:
                             game.black_move_uci = revert_uci
                             game.black_is_retreating = True
+                        else:
+                            black_lost_spacetime = True
                 
-                result = game.resolve_turn()
+                if white_lost_spacetime and black_lost_spacetime:
+                    game.game_over = True
+                    game.winner = "empate"
+                    game.reason = "Ambos os jogadores ficaram presos fora do espaço-tempo por inatividade!"
+                elif white_lost_spacetime:
+                    game.game_over = True
+                    game.winner = "black"
+                    game.reason = "As Brancas ficaram presas fora do espaço-tempo por inatividade!"
+                elif black_lost_spacetime:
+                    game.game_over = True
+                    game.winner = "white"
+                    game.reason = "As Pretas ficaram presas fora do espaço-tempo por inatividade!"
+                
+                if not game.game_over:
+                    result = game.resolve_turn()
+                else:
+                    result = {
+                        "fen": game.board.fen(),
+                        "white_move_uci": None,
+                        "black_move_uci": None,
+                        "white_move_san": None,
+                        "black_move_san": None,
+                        "events": ["🌀 " + game.reason],
+                        "game_over": True,
+                        "winner": game.winner,
+                        "reason": game.reason
+                    }
+
                 await self.broadcast(room_id, {
                     "type": MessageType.TURN_RESOLVED,
                     "data": result

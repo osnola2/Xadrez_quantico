@@ -49,7 +49,7 @@ O tempo é implacável no nível quântico. Se o tempo da rodada se esgotar e vo
 - Essa peça será **forçada a fazer o movimento inverso** de volta para a casa de onde veio!
 - Esse movimento entra na resolução simultânea normalmente (podendo causar colisões ou ser bloqueada).
 - **Desvantagem na Colisão:** Se a sua peça estiver sofrendo uma Reversão Temporal e colidir com uma peça inimiga que está avançando para a mesma casa, a sua peça revertida perde o embate e é aniquilada, enquanto a peça inimiga sobrevive e toma a casa!
-- *(Se for o turno 1, ou se você não tiver peças com histórico válido, você apenas perderá o turno).*
+- *(Se for o turno 1, ou se você não tiver peças com histórico válido para reverter, **você ficará perdido no espaço-tempo e perderá a partida imediatamente!**)*
 
 ---
 
