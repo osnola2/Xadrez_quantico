@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,12 @@
     <!-- Google Fonts: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
     <div class="background-effects">
         <div class="glow-orb orb-1"></div>
@@ -21,7 +25,7 @@
         <div class="modal-card glass-panel">
             <h1 class="logo-title">♟️ XADREZ <span class="gradient-text">SIMULTÂNEO</span></h1>
             <p class="subtitle">Turnos síncronos. Submissões secretas. Aniquilação mútua.</p>
-            
+
             <div class="form-group">
                 <label for="player-name">Seu Nome:</label>
                 <input type="text" id="player-name" value="Jogador Quântico" placeholder="Digite seu apelido">
@@ -41,6 +45,15 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label>Ritmo (Tempo por Rodada):</label>
+                <div class="duration-selector">
+                    <button class="duration-btn" data-duration="30">⚡ 30s</button>
+                    <button class="duration-btn active" data-duration="120">⏱️ 2 Min (Padrão)</button>
+                    <button class="duration-btn" data-duration="300">🧘 5 Min</button>
+                </div>
+            </div>
+
             <button id="btn-join" class="btn-primary">ENTRAR NA BATALHA ⚡</button>
         </div>
     </div>
@@ -53,10 +66,10 @@
                 <h2>Sala: <span id="display-room-id" class="highlight">---</span></h2>
                 <span id="connection-status" class="badge badge-online">🟢 Conectado</span>
             </div>
-            
+
             <div class="timer-container">
                 <div class="timer-circle">
-                    <span id="timer-display">20</span>
+                    <span id="timer-display">120</span>
                     <small>segundos</small>
                 </div>
                 <div class="timer-progress">
@@ -102,7 +115,10 @@
                     </div>
                     <div class="move-controls">
                         <span id="selected-move-text" class="move-preview">Nenhuma peça selecionada</span>
-                        <button id="btn-submit-move" class="btn-action" disabled>CONFIRMAR JOGADA ⚡</button>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button id="btn-submit-move" class="btn-action" disabled>CONFIRMAR JOGADA ⚡</button>
+                            <button id="btn-resign" class="btn-action" style="background: #ff4b4b;">DESISTIR 🏳️</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -115,11 +131,13 @@
                 <div class="log-entry system">Sala iniciada. Aguardando submissão simultânea...</div>
             </div>
             <div class="rules-hint">
-                💡 <strong>Dica de Regra:</strong> Ambas as jogadas acontecem ao mesmo tempo! Se tentarem ir para a mesma casa, ambas explodem (Aniquilação Mútua)!
+                💡 <strong>Dica de Regra:</strong> Ambas as jogadas acontecem ao mesmo tempo! Se tentarem ir para a
+                mesma casa, ambas explodem (Aniquilação Mútua)!
             </div>
         </aside>
     </div>
 
-    <script src="/static/js/app.js"></script>
+    <script src="/static/js/app.js?v=3"></script>
 </body>
+
 </html>

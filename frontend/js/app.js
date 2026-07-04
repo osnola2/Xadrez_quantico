@@ -142,7 +142,10 @@ function handleServerMessage(msg) {
         updateReadyStatus(false, false);
     } else if (type === "game_over") {
         addLog(`🏆 FIM DE JOGO! ${data.reason}`, "victory");
-        alert(`🏆 FIM DE JOGO!\n\n${data.reason}`);
+        const playAgain = confirm(`🏆 FIM DE JOGO!\n\n${data.reason}\n\nDeseja iniciar uma nova partida nesta mesma sala?`);
+        if (playAgain) {
+            ws.send(JSON.stringify({ type: "restart", data: {} }));
+        }
     } else if (type === "error") {
         addLog(`⚠️ Erro: ${data.message}`, "collision");
         alert(`Erro: ${data.message}`);
@@ -221,22 +224,28 @@ function renderBoard() {
     for (let r = 0; r < 8; r++) {
         const rankIndex = isBlackView ? (7 - r) : r;
         const rankStr = ranks[rankIndex];
-        let fileIndex = 0;
-
+        // Resolve as peças da linha
+        const squaresInRank = [];
         for (let i = 0; i < rankStr.length; i++) {
             const char = rankStr[i];
             if (!isNaN(char)) {
                 const emptyCount = parseInt(char, 10);
                 for (let e = 0; e < emptyCount; e++) {
-                    const actualFile = isBlackView ? (7 - fileIndex) : fileIndex;
-                    createSquare(actualFile, rankNumbers[rankIndex], null);
-                    fileIndex++;
+                    squaresInRank.push(null);
                 }
             } else {
-                const actualFile = isBlackView ? (7 - fileIndex) : fileIndex;
-                createSquare(actualFile, rankNumbers[rankIndex], char);
-                fileIndex++;
+                squaresInRank.push(char);
             }
+        }
+
+        // Se for visão das pretas, invertemos a linha para desenhar da direita (h) para a esquerda (a)
+        if (isBlackView) {
+            squaresInRank.reverse();
+        }
+
+        for (let i = 0; i < 8; i++) {
+            const fileIdx = isBlackView ? (7 - i) : i;
+            createSquare(fileIdx, rankNumbers[rankIndex], squaresInRank[i]);
         }
     }
 }
@@ -246,7 +255,7 @@ function createSquare(fileIdx, rankNum, pieceChar) {
     const sqName = `${fileChar}${rankNum}`;
     
     const sqEl = document.createElement("div");
-    const isDark = (fileIdx + rankNum) % 2 === 0;
+    const isDark = (fileIdx + rankNum) % 2 !== 0;
     sqEl.className = `square ${isDark ? 'dark' : 'light'}`;
     sqEl.dataset.square = sqName;
 
@@ -319,4 +328,13 @@ document.getElementById("btn-submit-move").addEventListener("click", () => {
         type: "submit_move",
         data: { uci: uciMove }
     }));
+});
+
+document.getElementById("btn-resign").addEventListener("click", () => {
+    if (confirm("Tem certeza que deseja desistir da partida?")) {
+        ws.send(JSON.stringify({
+            type: "resign",
+            data: {}
+        }));
+    }
 });

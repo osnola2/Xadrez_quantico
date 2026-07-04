@@ -27,17 +27,22 @@ class RoomManager:
         self.connections: Dict[str, Dict[WebSocket, PlayerColor]] = {}
         self.timer_tasks: Dict[str, asyncio.Task] = {}
 
-    def get_or_create_game(self, room_id: str) -> SimultaneousChessGame:
+    def get_or_create_game(self, room_id: str, turn_duration_seconds: int = 120) -> SimultaneousChessGame:
         if room_id not in self.games:
-            self.games[room_id] = SimultaneousChessGame(room_id=room_id, turn_duration_seconds=20)
+            self.games[room_id] = SimultaneousChessGame(room_id=room_id, turn_duration_seconds=turn_duration_seconds)
             self.connections[room_id] = {}
             # Iniciar task de cronômetro da sala
             self.timer_tasks[room_id] = asyncio.create_task(self.room_loop(room_id))
+        else:
+            game = self.games[room_id]
+            if game.round_number == 1 and game.timer_seconds == game.turn_duration:
+                game.turn_duration = turn_duration_seconds
+                game.timer_seconds = turn_duration_seconds
         return self.games[room_id]
 
-    async def connect(self, room_id: str, websocket: WebSocket, color_str: str):
+    async def connect(self, room_id: str, websocket: WebSocket, color_str: str, duration: int = 120):
         await websocket.accept()
-        game = self.get_or_create_game(room_id)
+        game = self.get_or_create_game(room_id, duration)
         
         try:
             color = PlayerColor(color_str.lower())
@@ -94,6 +99,7 @@ class RoomManager:
                 "type": MessageType.TIMER_TICK,
                 "data": {
                     "timer_seconds": game.timer_seconds,
+                    "turn_duration": game.turn_duration,
                     "white_ready": game.white_ready,
                     "black_ready": game.black_ready
                 }
@@ -118,9 +124,9 @@ class RoomManager:
 manager = RoomManager()
 
 @app.websocket("/ws/game/{room_id}/{color}")
-async def websocket_endpoint(websocket: WebSocket, room_id: str, color: str):
-    await manager.connect(room_id, websocket, color)
-    game = manager.get_or_create_game(room_id)
+async def websocket_endpoint(websocket: WebSocket, room_id: str, color: str, duration: int = 120):
+    await manager.connect(room_id, websocket, color, duration)
+    game = manager.get_or_create_game(room_id, duration)
     try:
         while True:
             data = await websocket.receive_json()
@@ -171,5 +177,25 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, color: str):
                         "type": MessageType.ERROR,
                         "data": {"message": reason}
                     })
+            elif msg_type == MessageType.RESIGN:
+                color_enum = manager.connections[room_id].get(websocket, PlayerColor.SPECTATOR)
+                if color_enum == PlayerColor.SPECTATOR:
+                    continue
+                
+                is_white = (color_enum == PlayerColor.WHITE)
+                game.resign(is_white)
+                await manager.broadcast(room_id, {
+                    "type": MessageType.GAME_OVER,
+                    "data": {
+                        "winner": game.winner,
+                        "reason": game.reason
+                    }
+                })
+            elif msg_type == MessageType.RESTART:
+                game.reset()
+                await manager.broadcast(room_id, {
+                    "type": MessageType.GAME_STATE,
+                    "data": game.get_state()
+                })
     except WebSocketDisconnect:
         manager.disconnect(room_id, websocket)

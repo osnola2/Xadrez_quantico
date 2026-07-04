@@ -3,7 +3,7 @@ from typing import Optional, Tuple, List, Dict, Any
 import asyncio
 
 class SimultaneousChessGame:
-    def __init__(self, room_id: str, turn_duration_seconds: int = 20):
+    def __init__(self, room_id: str, turn_duration_seconds: int = 120):
         self.room_id = room_id
         self.board = chess.Board()
         self.turn_duration = turn_duration_seconds
@@ -51,13 +51,72 @@ class SimultaneousChessGame:
         if piece is None or piece.color != color:
             return False
 
-        # Para checar pseudo-legalidade, temporariamente mudamos o turno do tabuleiro
+        # Autocompletar promoção de peão para a checagem, caso não venha do frontend
+        if piece.piece_type == chess.PAWN:
+            if (color == chess.WHITE and chess.square_rank(move.to_square) == 7) or \
+               (color == chess.BLACK and chess.square_rank(move.to_square) == 0):
+                if move.promotion is None:
+                    move = chess.Move(move.from_square, move.to_square, promotion=chess.QUEEN)
+
+        # Para checar pseudo-legalidade, a casa de destino pode mudar (ficar vazia ou ser ocupada por inimigo)
+        target_square = move.to_square
+        original_target_piece = self.board.piece_at(target_square)
+        enemy_color = not color
+
+        # Como cada jogador só faz UMA jogada por turno, peças aliadas NÃO PODEM sair da frente
+        # no mesmo turno em que você move outra peça. Logo, fogo amigo é impossível/ilegal.
+        if original_target_piece and original_target_piece.color == color:
+            return False
+        
         old_turn = self.board.turn
         self.board.turn = color
-        is_pseudo_legal = move in self.board.pseudo_legal_moves
+
+        is_pseudo_legal = False
+        
+        # Teste 1: Casa de destino VAZIA
+        self.board.remove_piece_at(target_square)
+        if move in self.board.pseudo_legal_moves:
+            is_pseudo_legal = True
+            
+        # Teste 2: Casa de destino INIMIGA
+        if not is_pseudo_legal:
+            self.board.set_piece_at(target_square, chess.Piece(chess.QUEEN, enemy_color))
+            if move in self.board.pseudo_legal_moves:
+                is_pseudo_legal = True
+
+        # Restaura o tabuleiro
+        if original_target_piece:
+            self.board.set_piece_at(target_square, original_target_piece)
+        else:
+            self.board.remove_piece_at(target_square)
+            
         self.board.turn = old_turn
 
         return is_pseudo_legal
+
+    def resign(self, is_white: bool):
+        self.game_over = True
+        self.winner = "black" if is_white else "white"
+        resigner = "Brancas" if is_white else "Pretas"
+        self.reason = f"O jogador de {resigner} desistiu da partida."
+        self.history.append({
+            "round": self.round_number,
+            "events": [f"🏳️ {resigner} desistiram da partida!"],
+            "fen_after": self.board.fen()
+        })
+
+    def reset(self):
+        self.board.reset()
+        self.timer_seconds = self.turn_duration
+        self.white_move_uci = None
+        self.black_move_uci = None
+        self.white_ready = False
+        self.black_ready = False
+        self.game_over = False
+        self.winner = None
+        self.reason = None
+        self.history = []
+        self.round_number = 1
 
     def submit_move(self, uci: str, color: bool) -> Tuple[bool, str]:
         if self.game_over:
@@ -115,30 +174,48 @@ class SimultaneousChessGame:
             # Movimento Branco
             if w_move and w_piece:
                 captured = self.board.piece_at(w_move.to_square)
-                if captured:
-                    events.append(f"⚔️ Brancas capturaram {captured.symbol()} em {chess.square_name(w_move.to_square)}!")
-                
-                # Checar Promoção de Peão
-                if w_piece.piece_type == chess.PAWN and chess.square_rank(w_move.to_square) == 7:
-                    prom_type = w_move.promotion if w_move.promotion else chess.QUEEN
-                    w_piece = chess.Piece(prom_type, chess.WHITE)
-                    events.append(f"👑 Peão branco promovido em {chess.square_name(w_move.to_square)}!")
+                is_pawn_forward = (w_piece.piece_type == chess.PAWN and chess.square_file(w_move.from_square) == chess.square_file(w_move.to_square))
+                is_pawn_diagonal = (w_piece.piece_type == chess.PAWN and chess.square_file(w_move.from_square) != chess.square_file(w_move.to_square))
 
-                self.board.set_piece_at(w_move.to_square, w_piece)
+                if is_pawn_forward and captured:
+                    events.append(f"🛡️ Bloqueio! O Peão branco tentou avançar, mas colidiu com a peça em {chess.square_name(w_move.to_square)} e recuou!")
+                    self.board.set_piece_at(w_move.from_square, w_piece)
+                elif is_pawn_diagonal and not captured:
+                    events.append(f"💨 Vento! O Peão branco atacou {chess.square_name(w_move.to_square)} em vão e recuou!")
+                    self.board.set_piece_at(w_move.from_square, w_piece)
+                else:
+                    if captured:
+                        events.append(f"⚔️ Brancas capturaram {captured.symbol()} em {chess.square_name(w_move.to_square)}!")
+                    
+                    if w_piece.piece_type == chess.PAWN and chess.square_rank(w_move.to_square) == 7:
+                        prom_type = w_move.promotion if w_move.promotion else chess.QUEEN
+                        w_piece = chess.Piece(prom_type, chess.WHITE)
+                        events.append(f"👑 Peão branco promovido em {chess.square_name(w_move.to_square)}!")
+
+                    self.board.set_piece_at(w_move.to_square, w_piece)
 
             # Movimento Preto
             if b_move and b_piece:
                 captured = self.board.piece_at(b_move.to_square)
-                if captured:
-                    events.append(f"⚔️ Pretas capturaram {captured.symbol()} em {chess.square_name(b_move.to_square)}!")
-                
-                # Checar Promoção de Peão
-                if b_piece.piece_type == chess.PAWN and chess.square_rank(b_move.to_square) == 0:
-                    prom_type = b_move.promotion if b_move.promotion else chess.QUEEN
-                    b_piece = chess.Piece(prom_type, chess.BLACK)
-                    events.append(f"👑 Peão preto promovido em {chess.square_name(b_move.to_square)}!")
+                is_pawn_forward = (b_piece.piece_type == chess.PAWN and chess.square_file(b_move.from_square) == chess.square_file(b_move.to_square))
+                is_pawn_diagonal = (b_piece.piece_type == chess.PAWN and chess.square_file(b_move.from_square) != chess.square_file(b_move.to_square))
 
-                self.board.set_piece_at(b_move.to_square, b_piece)
+                if is_pawn_forward and captured:
+                    events.append(f"🛡️ Bloqueio! O Peão preto tentou avançar, mas colidiu com a peça em {chess.square_name(b_move.to_square)} e recuou!")
+                    self.board.set_piece_at(b_move.from_square, b_piece)
+                elif is_pawn_diagonal and not captured:
+                    events.append(f"💨 Vento! O Peão preto atacou {chess.square_name(b_move.to_square)} em vão e recuou!")
+                    self.board.set_piece_at(b_move.from_square, b_piece)
+                else:
+                    if captured:
+                        events.append(f"⚔️ Pretas capturaram {captured.symbol()} em {chess.square_name(b_move.to_square)}!")
+                    
+                    if b_piece.piece_type == chess.PAWN and chess.square_rank(b_move.to_square) == 0:
+                        prom_type = b_move.promotion if b_move.promotion else chess.QUEEN
+                        b_piece = chess.Piece(prom_type, chess.BLACK)
+                        events.append(f"👑 Peão preto promovido em {chess.square_name(b_move.to_square)}!")
+
+                    self.board.set_piece_at(b_move.to_square, b_piece)
 
         # Passo 4: Verificar condição de vitória por queda do Rei
         white_king, black_king = self.check_kings_alive()

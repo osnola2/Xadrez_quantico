@@ -17,6 +17,8 @@ class MessageType(str, Enum):
     GAME_OVER = "game_over"
     ERROR = "error"
     GAME_STATE = "game_state"
+    RESIGN = "resign"
+    RESTART = "restart"
 
 class WSMessage(BaseModel):
     type: MessageType
