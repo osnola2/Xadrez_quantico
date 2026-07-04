@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xadrez Quântico & Simultâneo</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- Modal de Entrada / Lobby -->
+    <div id="lobby-modal" class="modal-overlay">
+        <div class="modal-card glass-panel">
+            <h1 class="logo-title">♟️ XADREZ <span class="gradient-text">SIMULTÂNEO</span></h1>
+            <p class="subtitle">Turnos síncronos. Submissões secretas. Aniquilação mútua.</p>
+            
+            <div class="form-group">
+                <label for="player-name">Seu Nome:</label>
+                <input type="text" id="player-name" value="Jogador Quântico" placeholder="Digite seu apelido">
+            </div>
+
+            <div class="form-group">
+                <label for="room-id">Sala de Jogo:</label>
+                <input type="text" id="room-id" value="sala-1" placeholder="Ex: sala-1">
+            </div>
+
+            <div class="form-group">
+                <label>Escolha sua Cor:</label>
+                <div class="color-selector">
+                    <button class="color-btn active" data-color="white">⚪ Brancas</button>
+                    <button class="color-btn" data-color="black">⚫ Pretas</button>
+                    <button class="color-btn" data-color="spectator">👁️ Espectador</button>
+                </div>
+            </div>
+
+            <button id="btn-join" class="btn-primary">ENTRAR NA BATALHA ⚡</button>
+        </div>
+    </div>
+
+    <!-- Interface Principal do Jogo -->
+    <div id="game-container" class="app-grid hidden">
+        <!-- Cabeçalho e Cronômetro -->
+        <header class="game-header glass-panel">
+            <div class="header-left">
+                <h2>Sala: <span id="display-room-id" class="highlight">---</span></h2>
+                <span id="connection-status" class="badge badge-online">🟢 Conectado</span>
+            </div>
+            
+            <div class="timer-container">
+                <div class="timer-circle">
+                    <span id="timer-display">20</span>
+                    <small>segundos</small>
+                </div>
+                <div class="timer-progress">
+                    <div id="timer-bar" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <span id="display-player-role" class="role-badge">---</span>
+            </div>
+        </header>
+
+        <!-- Área Principal: Tabuleiro e Jogadores -->
+        <main class="main-battlefield">
+            <div class="players-status">
+                <!-- Status Oponente -->
+                <div id="opponent-card" class="player-card glass-panel">
+                    <div class="player-info">
+                        <span class="player-icon">⚫</span>
+                        <div>
+                            <h4 id="opponent-name">Adversário (Pretas)</h4>
+                            <span id="opponent-badge" class="status-badge thinking">🤔 Pensando...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabuleiro -->
+                <div class="board-wrapper glass-panel">
+                    <div id="chessboard" class="chessboard"></div>
+                    <div id="explosion-overlay" class="explosion-overlay hidden">
+                        💥 COLISÃO QUÂNTICA!
+                    </div>
+                </div>
+
+                <!-- Status Jogador Atual -->
+                <div id="my-card" class="player-card glass-panel">
+                    <div class="player-info">
+                        <span class="player-icon">⚪</span>
+                        <div>
+                            <h4 id="my-name">Você (Brancas)</h4>
+                            <span id="my-badge" class="status-badge thinking">🤔 Escolhendo Jogada...</span>
+                        </div>
+                    </div>
+                    <div class="move-controls">
+                        <span id="selected-move-text" class="move-preview">Nenhuma peça selecionada</span>
+                        <button id="btn-submit-move" class="btn-action" disabled>CONFIRMAR JOGADA ⚡</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Painel Lateral: Log e Histórico -->
+        <aside class="sidebar glass-panel">
+            <h3>📜 Histórico da Batalha</h3>
+            <div id="battle-log" class="log-container">
+                <div class="log-entry system">Sala iniciada. Aguardando submissão simultânea...</div>
+            </div>
+            <div class="rules-hint">
+                💡 <strong>Dica de Regra:</strong> Ambas as jogadas acontecem ao mesmo tempo! Se tentarem ir para a mesma casa, ambas explodem (Aniquilação Mútua)!
+            </div>
+        </aside>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

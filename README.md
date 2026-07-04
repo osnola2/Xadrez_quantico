@@ -40,6 +40,21 @@ Como as jogadas acontecem exatamente no mesmo instante, surgem situações inéd
 
 ---
 
+## 🚀 Como Rodar o Jogo Localmente
+
+1. **Instale as dependências:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. **Inicie o servidor:**
+   ```bash
+   python run.py
+   ```
+3. **Abra no Navegador:**
+   Acesse **http://localhost:8000** em duas abas (ou em dispositivos diferentes na mesma rede) para testar uma partida simultânea!
+
+---
+
 ## 💬 Como Contribuir e Discutir Ideias
 
 Este repositório foi criado para facilitar o alinhamento de ideias e o design das mecânicas entre os criadores e colaboradores.
