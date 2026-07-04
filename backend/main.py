@@ -107,6 +107,18 @@ class RoomManager:
 
             # Verificar condição de resolução (tempo zerou OU ambos submeteram)
             if game.timer_seconds <= 0 or (game.white_ready and game.black_ready):
+                if game.timer_seconds <= 0:
+                    if not game.white_ready:
+                        revert_uci = game.get_revert_move(chess.WHITE)
+                        if revert_uci:
+                            game.white_move_uci = revert_uci
+                            game.white_is_retreating = True
+                    if not game.black_ready:
+                        revert_uci = game.get_revert_move(chess.BLACK)
+                        if revert_uci:
+                            game.black_move_uci = revert_uci
+                            game.black_is_retreating = True
+                
                 result = game.resolve_turn()
                 await self.broadcast(room_id, {
                     "type": MessageType.TURN_RESOLVED,

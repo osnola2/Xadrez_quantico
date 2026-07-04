@@ -43,6 +43,14 @@ Os peões possuem uma física especial de combate:
 ### 3.3. Capturas Padrão
 Se a sua peça pousar na casa do inimigo e ele não moveu a peça daquela casa, a peça dele é **capturada normalmente**, exatamente como no xadrez padrão.
 
+### 3.5. Penalidade por Tempo (Reversão Temporal)
+O tempo é implacável no nível quântico. Se o tempo da rodada se esgotar e você não tiver enviado uma jogada, **o universo pune a sua inatividade com uma Reversão Temporal!**
+- O sistema varrerá o seu histórico para encontrar a **última peça** que você moveu e que ainda está viva no tabuleiro.
+- Essa peça será **forçada a fazer o movimento inverso** de volta para a casa de onde veio!
+- Esse movimento entra na resolução simultânea normalmente (podendo causar colisões ou ser bloqueada).
+- **Desvantagem na Colisão:** Se a sua peça estiver sofrendo uma Reversão Temporal e colidir com uma peça inimiga que está avançando para a mesma casa, a sua peça revertida perde o embate e é aniquilada, enquanto a peça inimiga sobrevive e toma a casa!
+- *(Se for o turno 1, ou se você não tiver peças com histórico válido, você apenas perderá o turno).*
+
 ---
 
 ## 🏆 4. Fim de Jogo
