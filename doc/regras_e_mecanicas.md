@@ -20,11 +20,10 @@ Este documento detalha as propostas de regras e resolução de conflitos para a 
 
 Abaixo estão os 4 principais cenários de conflito em um turno simultâneo e as propostas para debate com os idealizadores do projeto:
 
-### 💥 Cenário A: Colisão na Mesma Casa (Destino Comum)
+### 💥 Cenário A: Colisão na Mesma Casa (Destino Comum) — [REGRA OFICIAL DEFINIDA]
 * **O que acontece:** O jogador Branco move um Cavalo para `d5` e o jogador Preto move um Peão para a mesma casa `d5` na mesma rodada.
-* **Proposta 1 (Aniquilação Mútua - Recomendada):** O choque de duas peças na mesma casa gera uma explosão! Ambas as peças são capturadas e removidas do jogo, deixando a casa `d5` vazia.
-* **Proposta 2 (Hierarquia de Força):** A peça de maior valor (Dama > Torre > Bispo/Cavalo > Peão) sobrevive e ocupa a casa, destruindo a menor. Se tiverem o mesmo valor, ambas são destruídas.
-* **Proposta 3 (Física Quântica / Sorte):** Cada peça tem 50% de probabilidade de ocupar a casa, capturando a outra.
+* **Regra Oficial (Aniquilação Mútua):** O choque de duas peças movendo-se para a mesma casa gera uma explosão! **Ambas as peças são destruídas e removidas do jogo**, deixando a casa de destino (`d5`) vazia.
+  *(Nota: Esta dinâmica eletrizante premia a previsão tática e evita discussões de valor de peça).*
 
 ### 💨 Cenário B: Esquiva / Alvo em Movimento (Regra Geral de Casa Vazia)
 * **O que acontece:** O Branco tenta capturar uma peça preta em `e5` (movendo para `e5`). No entanto, na mesma rodada, o Preto decidiu mover essa peça para outra casa.
