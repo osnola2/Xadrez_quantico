@@ -165,11 +165,35 @@ class SimultaneousChessGame:
 
         # Passo 2 & 3: Resolver destinos
         if w_move and b_move and w_move.to_square == b_move.to_square and w_piece and b_piece:
-            # Cenário A: Colisão na mesma casa -> Aniquilação Mútua!
-            target_sq_name = chess.square_name(w_move.to_square)
-            # Remove qualquer peça parada que estava no destino antes da colisão
-            self.board.remove_piece_at(w_move.to_square)
-            events.append(f"💥 COLISÃO EM {target_sq_name.upper()}! Ambas as peças ({w_piece.symbol()} branca e {b_piece.symbol()} preta) colidiram e foram aniquiladas!")
+            w_is_pawn = (w_piece.piece_type == chess.PAWN)
+            b_is_pawn = (b_piece.piece_type == chess.PAWN)
+            
+            w_is_diagonal = w_is_pawn and (chess.square_file(w_move.from_square) != chess.square_file(w_move.to_square))
+            w_is_vertical = w_is_pawn and (chess.square_file(w_move.from_square) == chess.square_file(w_move.to_square))
+            
+            b_is_diagonal = b_is_pawn and (chess.square_file(b_move.from_square) != chess.square_file(b_move.to_square))
+            b_is_vertical = b_is_pawn and (chess.square_file(b_move.from_square) == chess.square_file(b_move.to_square))
+
+            if w_is_diagonal and b_is_vertical:
+                events.append(f"⚔️ Emboscada! O Peão branco atacou na diagonal e capturou o Peão preto que avançava para {chess.square_name(w_move.to_square)}!")
+                if chess.square_rank(w_move.to_square) == 7:
+                    prom_type = w_move.promotion if w_move.promotion else chess.QUEEN
+                    w_piece = chess.Piece(prom_type, chess.WHITE)
+                    events.append(f"👑 Peão branco promovido em {chess.square_name(w_move.to_square)}!")
+                self.board.set_piece_at(w_move.to_square, w_piece)
+                
+            elif b_is_diagonal and w_is_vertical:
+                events.append(f"⚔️ Emboscada! O Peão preto atacou na diagonal e capturou o Peão branco que avançava para {chess.square_name(b_move.to_square)}!")
+                if chess.square_rank(b_move.to_square) == 0:
+                    prom_type = b_move.promotion if b_move.promotion else chess.QUEEN
+                    b_piece = chess.Piece(prom_type, chess.BLACK)
+                    events.append(f"👑 Peão preto promovido em {chess.square_name(b_move.to_square)}!")
+                self.board.set_piece_at(b_move.to_square, b_piece)
+                
+            else:
+                # Cenário A: Colisão na mesma casa -> Aniquilação Mútua!
+                self.board.remove_piece_at(w_move.to_square)
+                events.append(f"💥 COLISÃO EM {chess.square_name(w_move.to_square).upper()}! Ambas as peças ({w_piece.symbol()} branca e {b_piece.symbol()} preta) colidiram e foram aniquiladas!")
         else:
             # Movimento Branco
             if w_move and w_piece:

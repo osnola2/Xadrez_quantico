@@ -28,7 +28,14 @@ Se os dois jogadores tentarem mover suas peças para a **mesma exata casa** no m
 - **Colisão Crítica!** As duas peças batem de frente no meio do caminho.
 - Ambas as peças são **destruídas** (Aniquiladas) e removidas do tabuleiro. Ninguém fica com a casa!
 
-### 3.2. Peões: Bloqueios e Golpes no Vento
+### 3.2. Emboscada de Peões (Exceção de Colisão)
+Existe uma exceção à regra de Aniquilação Mútua exclusiva para peões:
+- Se um peão ataca **na diagonal** para uma casa...
+- E no mesmo instante, o peão inimigo avança **para a frente** (movimento vertical) para aquela mesma casa...
+- **Vitória do Atacante!** O peão que atacou na diagonal "embosca" o peão que estava apenas correndo para frente. O atacante sobrevive e captura o peão inimigo!
+- *(Nota: Se ambos os peões atacarem na diagonal para a mesma casa, a regra de Aniquilação Mútua volta a valer).*
+
+### 3.3. Peões: Bloqueios e Golpes no Vento
 Os peões possuem uma física especial de combate:
 - **🛡️ Bloqueio (Falha de Avanço):** Se o seu peão tentar avançar para frente, mas o oponente **não** tirar a peça dele da frente, o seu peão colide com ela, o movimento falha, e o seu peão recua para a casa original perdendo o turno.
 - **💨 Vento (Falha de Captura):** Se o seu peão atacar na diagonal, mas o oponente for esperto e remover a peça dele a tempo, o seu peão golpeia o vazio, o ataque falha, e o peão recua para a casa original.
