@@ -133,7 +133,7 @@ function handleServerMessage(msg) {
                 triggerExplosionAnimation();
             }
         } else {
-            addLog(`Turno resolvido: Brancas (${data.white_move_uci || 'Passou'}) vs Pretas (${data.black_move_uci || 'Passou'})`, "system");
+            addLog(`Turno resolvido: Brancas (${data.white_move_san || 'Passou'}) vs Pretas (${data.black_move_san || 'Passou'})`, "system");
         }
 
         renderBoard();

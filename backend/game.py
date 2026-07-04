@@ -142,6 +142,23 @@ class SimultaneousChessGame:
         black_king = bool(self.board.pieces(chess.KING, chess.BLACK))
         return white_king, black_king
 
+    def get_san_safe(self, move: chess.Move, color: bool) -> str:
+        if not move:
+            return ""
+        old_turn = self.board.turn
+        self.board.turn = color
+        try:
+            san = self.board.san(move)
+        except Exception:
+            piece = self.board.piece_at(move.from_square)
+            if piece:
+                p_sym = "" if piece.piece_type == chess.PAWN else piece.symbol().upper()
+                san = f"{p_sym}{chess.square_name(move.from_square)}-{chess.square_name(move.to_square)}"
+            else:
+                san = move.uci()
+        self.board.turn = old_turn
+        return san
+
     def resolve_turn(self) -> Dict[str, Any]:
         """
         Executa a resolução simultânea do turno com base no algoritmo aprovado:
@@ -157,13 +174,18 @@ class SimultaneousChessGame:
         w_move = chess.Move.from_uci(w_uci) if w_uci else None
         b_move = chess.Move.from_uci(b_uci) if b_uci else None
 
+        w_san = self.get_san_safe(w_move, chess.WHITE) if w_move else ""
+        b_san = self.get_san_safe(b_move, chess.BLACK) if b_move else ""
+
         w_piece = self.board.piece_at(w_move.from_square) if w_move else None
         b_piece = self.board.piece_at(b_move.from_square) if b_move else None
 
         # Passo 1: Salvar últimos movimentos
         self.last_moves = {
             "white": w_uci if w_uci else None,
-            "black": b_uci if b_uci else None
+            "black": b_uci if b_uci else None,
+            "white_san": w_san,
+            "black_san": b_san
         }
 
         # Passo 2: Remover peças em movimento de suas origens
@@ -273,6 +295,8 @@ class SimultaneousChessGame:
             "round": self.round_number,
             "white_move": w_uci,
             "black_move": b_uci,
+            "white_san": w_san,
+            "black_san": b_san,
             "events": events,
             "fen_after": self.board.fen()
         }
@@ -290,6 +314,8 @@ class SimultaneousChessGame:
             "fen": self.board.fen(),
             "white_move_uci": w_uci,
             "black_move_uci": b_uci,
+            "white_move_san": w_san,
+            "black_move_san": b_san,
             "events": events,
             "game_over": self.game_over,
             "winner": self.winner,
