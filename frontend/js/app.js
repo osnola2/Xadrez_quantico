@@ -28,6 +28,7 @@ let currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 let selectedSquare = null;
 let targetSquare = null;
 let isSubmitted = false;
+let lastMoves = { white: null, black: null };
 
 // Elementos DOM
 const lobbyModal = document.getElementById("lobby-modal");
@@ -97,6 +98,7 @@ function handleServerMessage(msg) {
 
     if (type === "game_state") {
         currentFen = data.fen;
+        lastMoves = data.last_moves || { white: null, black: null };
         renderBoard();
         updateReadyStatus(data.white_ready, data.black_ready);
         updateTimer(data.timer_seconds, data.turn_duration);
@@ -106,8 +108,6 @@ function handleServerMessage(msg) {
         updateReadyStatus(data.white_ready, data.black_ready);
         if (data.color === myColor) {
             isSubmitted = true;
-            document.getElementById("btn-submit-move").disabled = true;
-            document.getElementById("btn-submit-move").innerText = "JOGADA ENVIADA ✅";
             document.getElementById("my-badge").className = "status-badge ready";
             document.getElementById("my-badge").innerText = "⚡ Pronto!";
         }
@@ -120,8 +120,6 @@ function handleServerMessage(msg) {
         selectedSquare = null;
         targetSquare = null;
         document.getElementById("selected-move-text").innerText = "Nenhuma peça selecionada";
-        document.getElementById("btn-submit-move").disabled = true;
-        document.getElementById("btn-submit-move").innerText = "CONFIRMAR JOGADA ⚡";
         
         // Exibir eventos de colisão ou captura
         if (data.events && data.events.length > 0) {
@@ -262,6 +260,13 @@ function createSquare(fileIdx, rankNum, pieceChar) {
     if (selectedSquare === sqName) sqEl.classList.add("selected");
     if (targetSquare === sqName) sqEl.classList.add("target");
 
+    if (lastMoves.white && (lastMoves.white.startsWith(sqName) || lastMoves.white.endsWith(sqName))) {
+        sqEl.classList.add("last-move-white");
+    }
+    if (lastMoves.black && (lastMoves.black.startsWith(sqName) || lastMoves.black.endsWith(sqName))) {
+        sqEl.classList.add("last-move-black");
+    }
+
     if (pieceChar) {
         const pieceEl = document.createElement("div");
         pieceEl.className = "piece";
@@ -302,25 +307,25 @@ function onSquareClick(sqName, pieceChar) {
 
     updateMoveControls();
     renderBoard();
+
+    if (targetSquare) {
+        submitMove();
+    }
 }
 
 function updateMoveControls() {
     const textEl = document.getElementById("selected-move-text");
-    const btnEl = document.getElementById("btn-submit-move");
 
     if (selectedSquare && targetSquare) {
-        textEl.innerText = `Movimento selecionado: ${selectedSquare.toUpperCase()} ➔ ${targetSquare.toUpperCase()}`;
-        btnEl.disabled = false;
+        textEl.innerText = `Movimento enviado: ${selectedSquare.toUpperCase()} ➔ ${targetSquare.toUpperCase()}`;
     } else if (selectedSquare) {
         textEl.innerText = `Peça em ${selectedSquare.toUpperCase()} selecionada. Escolha o destino...`;
-        btnEl.disabled = true;
     } else {
         textEl.innerText = "Nenhuma peça selecionada";
-        btnEl.disabled = true;
     }
 }
 
-document.getElementById("btn-submit-move").addEventListener("click", () => {
+function submitMove() {
     if (!selectedSquare || !targetSquare || isSubmitted) return;
     const uciMove = `${selectedSquare}${targetSquare}`;
     
@@ -328,7 +333,7 @@ document.getElementById("btn-submit-move").addEventListener("click", () => {
         type: "submit_move",
         data: { uci: uciMove }
     }));
-});
+}
 
 document.getElementById("btn-resign").addEventListener("click", () => {
     if (confirm("Tem certeza que deseja desistir da partida?")) {

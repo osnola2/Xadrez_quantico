@@ -19,6 +19,7 @@ class SimultaneousChessGame:
         self.winner: Optional[str] = None
         self.reason: Optional[str] = None
         self.history: List[Dict[str, Any]] = []
+        self.last_moves: Dict[str, str] = {"white": None, "black": None}
         self.round_number: int = 1
 
     def get_state(self) -> Dict[str, Any]:
@@ -33,7 +34,8 @@ class SimultaneousChessGame:
             "winner": self.winner,
             "reason": self.reason,
             "round_number": self.round_number,
-            "history": self.history
+            "history": self.history,
+            "last_moves": self.last_moves
         }
 
     def is_valid_move(self, uci: str, color: bool) -> bool:
@@ -116,6 +118,7 @@ class SimultaneousChessGame:
         self.winner = None
         self.reason = None
         self.history = []
+        self.last_moves = {"white": None, "black": None}
         self.round_number = 1
 
     def submit_move(self, uci: str, color: bool) -> Tuple[bool, str]:
@@ -157,7 +160,13 @@ class SimultaneousChessGame:
         w_piece = self.board.piece_at(w_move.from_square) if w_move else None
         b_piece = self.board.piece_at(b_move.from_square) if b_move else None
 
-        # Passo 1: Remover peças em movimento de suas origens
+        # Passo 1: Salvar últimos movimentos
+        self.last_moves = {
+            "white": w_uci if w_uci else None,
+            "black": b_uci if b_uci else None
+        }
+
+        # Passo 2: Remover peças em movimento de suas origens
         if w_move and w_piece:
             self.board.remove_piece_at(w_move.from_square)
         if b_move and b_piece:
