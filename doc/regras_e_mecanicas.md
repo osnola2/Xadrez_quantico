@@ -26,13 +26,16 @@ Abaixo estão os 4 principais cenários de conflito em um turno simultâneo e as
 * **Proposta 2 (Hierarquia de Força):** A peça de maior valor (Dama > Torre > Bispo/Cavalo > Peão) sobrevive e ocupa a casa, destruindo a menor. Se tiverem o mesmo valor, ambas são destruídas.
 * **Proposta 3 (Física Quântica / Sorte):** Cada peça tem 50% de probabilidade de ocupar a casa, capturando a outra.
 
-### 💨 Cenário B: Esquiva / Alvo em Movimento
-* **O que acontece:** O Branco tenta capturar um Bispo preto em `e5` (movendo sua Torre para `e5`). No entanto, na mesma rodada, o Preto decidiu mover esse Bispo de `e5` para `g7`.
-* **Regra Proposta:** A Torre branca conclui seu movimento para a casa `e5` (que agora está vazia), sem realizar captura. O Bispo preto escapa ileso para `g7`. O ataque branco falhou porque o alvo se moveu!
+### 💨 Cenário B: Esquiva / Alvo em Movimento (Regra Geral de Casa Vazia)
+* **O que acontece:** O Branco tenta capturar uma peça preta em `e5` (movendo para `e5`). No entanto, na mesma rodada, o Preto decidiu mover essa peça para outra casa.
+* **Regra Proposta:** Como a peça alvo saiu da casa `e5` no mesmo instante, o ataque branco cai em uma casa vazia. O movimento se conclui normalmente para `e5` sem realizar captura, e a peça preta escapa ilesa para seu novo destino.
 
-### 🔄 Cenário C: Cruzamento de Posições
-* **O que acontece:** Duas peças inimigas trocam de posição na mesma linha/coluna/diagonal diretamente. Exemplo: Torre branca vai de `e1` para `e8`, e Torre preta vai de `e8` para `e1`.
-* **Regra Proposta:** As peças "passam uma pela outra" em sentidos opostos sem se chocarem, terminando suas jogadas com sucesso em suas novas casas.
+### 🔄 Cenário C: Cruzamento de Posições (Subcaso do Cenário B)
+* **O que acontece:** Duas peças inimigas trocam de posição diretamente na mesma linha, coluna ou diagonal. Exemplo: Torre branca vai de `e1` para `e8`, e Torre preta vai de `e8` para `e1`.
+* **Análise Lógica:** Exatamente como você observou, **este é um subcaso direto do Cenário B (uma esquiva recíproca)**! 
+  * Para o Branco, a peça preta que estava em `e8` se moveu. Logo, a Torre branca chega em `e8` sem capturar nada.
+  * Para o Preto, a peça branca que estava em `e1` também se moveu. Logo, a Torre preta chega em `e1` sem capturar nada.
+* **Conclusão:** Não há "choque no meio do caminho". Logicamente, as peças cruzam uma pela outra e ocupam as casas de destino pacificamente. Isso simplifica muito a programação do motor, pois unifica as regras em um único princípio: **"Se o alvo saiu da casa no início do turno, não há captura"**.
 
 ### ⏱️ Cenário D: Falta de Jogada no Tempo Limite (Timeout)
 * **O que acontece:** O cronômetro chega a zero e um dos jogadores não escolheu/confirmou sua jogada.
