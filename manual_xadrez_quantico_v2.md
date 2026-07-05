@@ -33,24 +33,12 @@ Se um Peão ataca uma casa na diagonal e, no exato mesmo turno, uma peça inimig
 
 ---
 
-## 5. Reversão Temporal (Penalidade por Estouro de Tempo)
-O que acontece se o relógio zerar antes de você confirmar sua jogada? Você não perde sua vez; você é empurrado de volta no tempo.
-1. O motor varre o histórico da partida para encontrar a **última peça que você moveu** (e que ainda esteja viva no tabuleiro).
-2. O motor forçará essa peça a **desfazer seu movimento**, recuando para a casa exata em que estava antes de ser jogada naquele turno passado.
-3. Este "recuo forçado" age como a sua jogada simultânea da rodada atual.
-
-**Cuidado:** A reversão temporal é um movimento cego. Se o seu oponente avançou uma peça para a mesma casa que a sua peça está tentando recuar, a reversão fracassa traumaticamente: a sua peça é **destruída** no paradoxo, e a peça inimiga fica com a casa.
+## 5. Penalidade por Estouro de Tempo
+Se o tempo acabar e você não tiver confirmado sua jogada, você simplesmente **perde a vez** naquele turno, ficando imóvel enquanto o oponente realiza a jogada dele.
 
 ---
 
-## 6. Perda de Espaço-Tempo
-A viagem no tempo cobra seu preço.
-Se o tempo acabar e você **não tiver nenhuma peça válida no histórico para reverter** (seja porque estamos no Turno 1 e você nunca moveu nada, ou porque a única peça que você havia movido na partida inteira já foi aniquilada em uma colisão), a gravidade quântica te esmaga.
-- **Resultado:** Você fica preso fora do espaço-tempo e perde a partida instantaneamente (Game Over imediato).
-
----
-
-## 7. O Roque Simultâneo
+## 6. O Roque Simultâneo
 O Roque no xadrez quântico movimenta tanto o Rei quanto a Torre no mesmo microssegundo. 
 Se você rocar e o oponente atacar:
 - A casa final do Rei será resolvida normalmente.
@@ -58,7 +46,7 @@ Se você rocar e o oponente atacar:
 
 ---
 
-## 8. Condição de Vitória (A Queda dos Reis)
+## 7. Condição de Vitória (A Queda dos Reis)
 O objetivo do jogo continua sendo a destruição do Rei adversário, que agora pode ocorrer via captura normal ou aniquilação em colisões.
 - Aquele que destruir o Rei inimigo primeiro ganha a partida.
 - Se, por um acaso do destino, **ambos os Reis forem capturados ou aniquilados no mesmo turno** (seja porque os Reis colidiram, ou porque dois ataques letais foram coordenados no mesmo turno), a partida terminará em um glorioso **Empate**!

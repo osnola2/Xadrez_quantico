@@ -141,17 +141,6 @@ class SimultaneousChessGame:
 
         return True, "Jogada submetida com sucesso."
 
-    def get_revert_move(self, color: bool) -> Optional[str]:
-        key = "white_move" if color == chess.WHITE else "black_move"
-        for round_info in reversed(self.history):
-            uci = round_info.get(key)
-            if uci:
-                move = chess.Move.from_uci(uci)
-                piece = self.board.piece_at(move.to_square)
-                if piece and piece.color == color:
-                    return f"{chess.square_name(move.to_square)}{chess.square_name(move.from_square)}"
-        return None
-
     def check_kings_alive(self) -> Tuple[bool, bool]:
         white_king = bool(self.board.pieces(chess.KING, chess.WHITE))
         black_king = bool(self.board.pieces(chess.KING, chess.BLACK))
@@ -192,10 +181,12 @@ class SimultaneousChessGame:
         w_san = self.get_san_safe(w_move, chess.WHITE) if w_move else ""
         b_san = self.get_san_safe(b_move, chess.BLACK) if b_move else ""
 
-        if self.white_is_retreating:
-            events.append(f"⏳ O tempo esgotou! As Brancas sofreram reversão temporal e a peça voltará para {chess.square_name(w_move.to_square) if w_move else 'nenhum lugar'}!")
-        if self.black_is_retreating:
-            events.append(f"⏳ O tempo esgotou! As Pretas sofreram reversão temporal e a peça voltará para {chess.square_name(b_move.to_square) if b_move else 'nenhum lugar'}!")
+        if not w_move and not b_move:
+            events.append("⏳ O tempo esgotou! Nenhum jogador agiu nesta rodada.")
+        elif not w_move:
+            events.append("⏳ O tempo esgotou! As Brancas não agiram nesta rodada.")
+        elif not b_move:
+            events.append("⏳ O tempo esgotou! As Pretas não agiram nesta rodada.")
 
         w_piece = self.board.piece_at(w_move.from_square) if w_move else None
         b_piece = self.board.piece_at(b_move.from_square) if b_move else None
@@ -251,15 +242,7 @@ class SimultaneousChessGame:
             b_is_diagonal = b_is_pawn and (chess.square_file(b_move.from_square) != chess.square_file(b_move.to_square))
             b_is_vertical = b_is_pawn and (chess.square_file(b_move.from_square) == chess.square_file(b_move.to_square))
 
-            if self.white_is_retreating and not self.black_is_retreating:
-                events.append(f"⏳ REVERSÃO FRACASSADA! A peça branca recuou para {chess.square_name(w_move.to_square)} colidindo com {b_piece.symbol()} e foi destruída!")
-                self.board.set_piece_at(b_move.to_square, b_piece)
-                
-            elif self.black_is_retreating and not self.white_is_retreating:
-                events.append(f"⏳ REVERSÃO FRACASSADA! A peça preta recuou para {chess.square_name(b_move.to_square)} colidindo com {w_piece.symbol()} e foi destruída!")
-                self.board.set_piece_at(w_move.to_square, w_piece)
-
-            elif w_is_diagonal and b_is_vertical:
+            if w_is_diagonal and b_is_vertical:
                 events.append(f"⚔️ Emboscada! O Peão branco atacou na diagonal e capturou o Peão preto que avançava para {chess.square_name(w_move.to_square)}!")
                 if chess.square_rank(w_move.to_square) == 7:
                     prom_type = w_move.promotion if w_move.promotion else chess.QUEEN
@@ -382,8 +365,6 @@ class SimultaneousChessGame:
         self.black_move_uci = None
         self.white_ready = False
         self.black_ready = False
-        self.white_is_retreating = False
-        self.black_is_retreating = False
         self.timer_seconds = self.turn_duration
 
         return {
