@@ -1,4 +1,5 @@
 import asyncio
+import chess
 from typing import Dict, Set, Optional
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
