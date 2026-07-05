@@ -382,6 +382,8 @@ class SimultaneousChessGame:
         self.black_move_uci = None
         self.white_ready = False
         self.black_ready = False
+        self.white_is_retreating = False
+        self.black_is_retreating = False
         self.timer_seconds = self.turn_duration
 
         return {
