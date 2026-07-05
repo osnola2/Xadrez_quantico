@@ -208,11 +208,37 @@ class SimultaneousChessGame:
             "black_san": b_san
         }
 
+        # Detecção de Roque
+        w_castling_rook_from = None
+        w_castling_rook_to = None
+        if w_move and w_piece and w_piece.piece_type == chess.KING:
+            if abs(chess.square_file(w_move.from_square) - chess.square_file(w_move.to_square)) == 2:
+                if w_move.to_square == chess.G1:
+                    w_castling_rook_from, w_castling_rook_to = chess.H1, chess.F1
+                elif w_move.to_square == chess.C1:
+                    w_castling_rook_from, w_castling_rook_to = chess.A1, chess.D1
+
+        b_castling_rook_from = None
+        b_castling_rook_to = None
+        if b_move and b_piece and b_piece.piece_type == chess.KING:
+            if abs(chess.square_file(b_move.from_square) - chess.square_file(b_move.to_square)) == 2:
+                if b_move.to_square == chess.G8:
+                    b_castling_rook_from, b_castling_rook_to = chess.H8, chess.F8
+                elif b_move.to_square == chess.C8:
+                    b_castling_rook_from, b_castling_rook_to = chess.A8, chess.D8
+
         # Passo 2: Remover peças em movimento de suas origens
         if w_move and w_piece:
             self.board.remove_piece_at(w_move.from_square)
+            if w_castling_rook_from is not None:
+                self.board.remove_piece_at(w_castling_rook_from)
         if b_move and b_piece:
             self.board.remove_piece_at(b_move.from_square)
+            if b_castling_rook_from is not None:
+                self.board.remove_piece_at(b_castling_rook_from)
+
+        w_piece_annihilated_by_rook = False
+        b_piece_annihilated_by_rook = False
 
         # Passo 2 & 3: Resolver destinos
         if w_move and b_move and w_move.to_square == b_move.to_square and w_piece and b_piece:
@@ -277,30 +303,50 @@ class SimultaneousChessGame:
 
                     self.board.set_piece_at(w_move.to_square, w_piece)
 
+                if w_castling_rook_from is not None:
+                    if b_move and b_move.to_square == w_castling_rook_to:
+                        events.append(f"💥 COLISÃO NO ROQUE! A Torre branca foi para {chess.square_name(w_castling_rook_to)} e colidiu com a peça preta! Ambas foram aniquiladas!")
+                        b_piece_annihilated_by_rook = True
+                    else:
+                        self.board.set_piece_at(w_castling_rook_to, chess.Piece(chess.ROOK, chess.WHITE))
+
             # Movimento Preto
             if b_move and b_piece:
-                captured = self.board.piece_at(b_move.to_square)
-                is_pawn_forward = (b_piece.piece_type == chess.PAWN and chess.square_file(b_move.from_square) == chess.square_file(b_move.to_square))
-                is_pawn_diagonal = (b_piece.piece_type == chess.PAWN and chess.square_file(b_move.from_square) != chess.square_file(b_move.to_square))
-
-                if is_pawn_forward and captured:
-                    events.append(f"🛡️ Bloqueio! O Peão preto tentou avançar, mas colidiu com a peça em {chess.square_name(b_move.to_square)} e recuou!")
-                    self.board.set_piece_at(b_move.from_square, b_piece)
-                elif is_pawn_diagonal and not captured:
-                    events.append(f"💨 Vento! O Peão preto atacou {chess.square_name(b_move.to_square)} em vão e recuou!")
-                    self.board.set_piece_at(b_move.from_square, b_piece)
+                if b_piece_annihilated_by_rook:
+                    pass
                 else:
-                    if captured:
-                        events.append(f"⚔️ Pretas capturaram {captured.symbol()} em {chess.square_name(b_move.to_square)}!")
-                    
-                    if b_piece.piece_type == chess.PAWN and chess.square_rank(b_move.to_square) == 0:
-                        prom_type = b_move.promotion if b_move.promotion else chess.QUEEN
-                        b_piece = chess.Piece(prom_type, chess.BLACK)
-                        events.append(f"👑 Peão preto promovido em {chess.square_name(b_move.to_square)}!")
+                    captured = self.board.piece_at(b_move.to_square)
+                    is_pawn_forward = (b_piece.piece_type == chess.PAWN and chess.square_file(b_move.from_square) == chess.square_file(b_move.to_square))
+                    is_pawn_diagonal = (b_piece.piece_type == chess.PAWN and chess.square_file(b_move.from_square) != chess.square_file(b_move.to_square))
 
-                    self.board.set_piece_at(b_move.to_square, b_piece)
+                    if is_pawn_forward and captured:
+                        events.append(f"🛡️ Bloqueio! O Peão preto tentou avançar, mas colidiu com a peça em {chess.square_name(b_move.to_square)} e recuou!")
+                        self.board.set_piece_at(b_move.from_square, b_piece)
+                    elif is_pawn_diagonal and not captured:
+                        events.append(f"💨 Vento! O Peão preto atacou {chess.square_name(b_move.to_square)} em vão e recuou!")
+                        self.board.set_piece_at(b_move.from_square, b_piece)
+                    else:
+                        if captured:
+                            events.append(f"⚔️ Pretas capturaram {captured.symbol()} em {chess.square_name(b_move.to_square)}!")
+                        
+                        if b_piece.piece_type == chess.PAWN and chess.square_rank(b_move.to_square) == 0:
+                            prom_type = b_move.promotion if b_move.promotion else chess.QUEEN
+                            b_piece = chess.Piece(prom_type, chess.BLACK)
+                            events.append(f"👑 Peão preto promovido em {chess.square_name(b_move.to_square)}!")
 
-        # Passo 4: Verificar condição de vitória por queda do Rei
+                        self.board.set_piece_at(b_move.to_square, b_piece)
+
+                if b_castling_rook_from is not None:
+                    if w_move and w_move.to_square == b_castling_rook_to:
+                        events.append(f"💥 COLISÃO NO ROQUE! A Torre preta foi para {chess.square_name(b_castling_rook_to)} e colidiu com a peça branca! Ambas foram aniquiladas!")
+                        self.board.remove_piece_at(b_castling_rook_to)
+                    else:
+                        self.board.set_piece_at(b_castling_rook_to, chess.Piece(chess.ROOK, chess.BLACK))
+
+        # Passo 4: Limpar direitos de roque de peças que se moveram
+        self.board.clean_castling_rights()
+
+        # Passo 5: Verificar condição de vitória por queda do Rei
         white_king, black_king = self.check_kings_alive()
         if not white_king and not black_king:
             self.game_over = True

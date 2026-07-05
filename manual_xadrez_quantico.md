@@ -51,6 +51,12 @@ O tempo é implacável no nível quântico. Se o tempo da rodada se esgotar e vo
 - **Desvantagem na Colisão:** Se a sua peça estiver sofrendo uma Reversão Temporal e colidir com uma peça inimiga que está avançando para a mesma casa, a sua peça revertida perde o embate e é aniquilada, enquanto a peça inimiga sobrevive e toma a casa!
 - *(Se for o turno 1, ou se você não tiver peças com histórico válido para reverter, **você ficará perdido no espaço-tempo e perderá a partida imediatamente!**)*
 
+### 3.6. O Roque Quântico
+Ao executar o Roque (movendo o Rei 2 casas para os lados), você estará viajando com **duas peças** simultaneamente (o Rei e a Torre). Como o turno é resolvido simultaneamente, cada peça corre risco de colisão de forma independente:
+- Se o inimigo atacar a nova casa do seu Rei, ocorre a Aniquilação Mútua e você perde o Rei (e a partida).
+- Se o inimigo atacar a nova casa da sua Torre, a sua Torre é aniquilada junto com o inimigo, mas **o seu Rei sobrevive** na nova casa intacto.
+- Você pode fazer o Roque mesmo que a casa de passagem esteja sendo atacada no mesmo turno.
+
 ---
 
 ## 🏆 4. Fim de Jogo
