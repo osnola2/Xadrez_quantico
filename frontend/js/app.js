@@ -141,15 +141,27 @@ function handleServerMessage(msg) {
         };
         renderBoard();
         updateReadyStatus(false, false);
+        setTerminalPrompt("awaiting_moves -t 120s");
     } else if (type === "game_over") {
         addLog(`🏆 FIM DE JOGO! ${data.reason}`, "victory");
         const playAgain = confirm(`🏆 FIM DE JOGO!\n\n${data.reason}\n\nDeseja iniciar uma nova partida nesta mesma sala?`);
         if (playAgain) {
+            setTerminalPrompt("rebooting_timeline...");
             ws.send(JSON.stringify({ type: "restart", data: {} }));
+        } else {
+            setTerminalPrompt("connection_terminated.");
         }
     } else if (type === "error") {
         addLog(`⚠️ Erro: ${data.message}`, "collision");
+        setTerminalPrompt(`ERR_CRITICAL: ${data.message.substring(0, 15)}...`);
         alert(`Erro: ${data.message}`);
+    }
+}
+
+function setTerminalPrompt(text) {
+    const promptEl = document.getElementById("prompt-text");
+    if (promptEl) {
+        promptEl.innerText = text;
     }
 }
 
@@ -174,6 +186,17 @@ function updateReadyStatus(whiteReady, blackReady) {
     } else {
         oppBadge.className = "status-badge thinking";
         oppBadge.innerText = "🤔 Pensando...";
+    }
+    
+    // Atualizar terminal
+    if (myReady && oppReady) {
+        setTerminalPrompt("resolving_quantum_state...");
+    } else if (myReady && !oppReady) {
+        setTerminalPrompt("awaiting_opponent_sync...");
+    } else if (!myReady && oppReady) {
+        setTerminalPrompt("opponent_synced. awaiting_local_input...");
+    } else {
+        setTerminalPrompt("awaiting_moves...");
     }
 }
 

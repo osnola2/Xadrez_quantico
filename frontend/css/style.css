@@ -585,3 +585,36 @@ body {
         height: auto;
     }
 }
+
+/* Terminal Prompt */
+.terminal-prompt {
+    margin-top: 15px;
+    background: #000;
+    border: 1px solid #333;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    color: #a3be8c;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.prompt-user {
+    color: var(--accent-cyan);
+    font-weight: bold;
+}
+.cursor-blink {
+    display: inline-block;
+    width: 8px;
+    background-color: var(--text-main);
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
