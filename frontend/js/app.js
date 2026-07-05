@@ -135,7 +135,10 @@ function handleServerMessage(msg) {
         } else {
             addLog(`Turno resolvido: Brancas (${data.white_move_san || 'Passou'}) vs Pretas (${data.black_move_san || 'Passou'})`, "system");
         }
-
+        lastMoves = {
+            white: data.white_move_uci,
+            black: data.black_move_uci
+        };
         renderBoard();
         updateReadyStatus(false, false);
     } else if (type === "game_over") {
